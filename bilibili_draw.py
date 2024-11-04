@@ -16,6 +16,7 @@ parser.add_argument("num", type=int, help="抽取个数")
 parser.add_argument("-f", "--file", type=str, help="评论csv文件 (可选，填写后将不进行爬数据和筛选数据)")
 parser.add_argument("-bv", "--bv_number", type=str, help="BV号")
 parser.add_argument("-q", "--qualification", action="store_true", default=False, help="是否筛选资格（默认不筛选）")
+parser.add_argument("-uid", "--uid", type=int, help="你的uid(检测资格时需要)")
 
 # 解析参数
 args = parser.parse_args()
@@ -40,9 +41,11 @@ else:
 
     # df = pd.read_csv('BV1YJ4m1u7hL_comments.csv')
     if args.qualification:
+        if not args.uid:
+            raise ValueError("请提供你的uid")
         start = time.time()
         print(f'开始提取{bv}的允许抽奖评论')
-        df = au.extract_allowed_comments(df, 946974)
+        df = au.extract_allowed_comments(df, args.uid)
         df.to_csv(f'{bv}_allowed.csv', index=False, encoding='utf-8')
         time_lapse = time.time() - start
         print(f'用时：{time_lapse}')
@@ -106,7 +109,4 @@ def draw_lottery(me: int = None):
 
 # 执行抽签示例
 if __name__ == "__main__":
-    start = time.time()
     draw_lottery()
-    time_lapse = time.time() - start
-    print("用时：", time_lapse)
