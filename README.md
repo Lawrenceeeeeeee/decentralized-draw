@@ -49,7 +49,14 @@ UP主可以在指定视频的评论区中发起抽奖
 
 #### 使用方法
 
-1. 先按照上文的方法生成RSA公私钥，并公开公钥
+0. 先获取浏览器的`User-Agent`，打开浏览器，启用开发者模式，在命令行中输入`console.log(navigator.userAgent)`即可获取。然后将`User-Agent`信息填入config.toml中
+
+```
+# config.toml
+User-Agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15"
+```
+
+1. 按照上文的方法生成RSA公私钥，并公开公钥
 2. 运行`bilibili_draw.py`，格式如下（如果选择传csv的话，表格需要包含'timestamp''uid''content'列）
 
 示例：

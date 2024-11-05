@@ -6,12 +6,16 @@ import time
 from functools import reduce
 from hashlib import md5
 import browser_cookie3
+import toml
+
+# 读取配置文件
+config = toml.load("config.toml")
 
 cookies = browser_cookie3.load(domain_name='bilibili.com')
 cookie_str = "; ".join([f"{cookie.name}={cookie.value}" for cookie in cookies])
 
 headers = {
-    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15",
+    "User-Agent": config["User-Agent"],
     "Referer": "https://www.bilibili.com/",
     "Cookie": cookie_str,
 }
@@ -62,7 +66,7 @@ def encWbi(params: dict, img_key: str, sub_key: str):
 def getWbiKeys() -> tuple[str, str]:
     "获取最新的 img_key 和 sub_key"
     headers = {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15",
+        "User-Agent": config["User-Agent"],
         "Referer": "https://www.bilibili.com/",
     }
     resp = httpx.get("https://api.bilibili.com/x/web-interface/nav", headers=headers)
