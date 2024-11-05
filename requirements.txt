@@ -8,3 +8,4 @@ pycryptodome~=3.21.0
 browser_cookie3
 bilibili-api-python
 pycryptodome
+pyzbar

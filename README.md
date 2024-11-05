@@ -13,13 +13,22 @@
 
 ## 使用方法：
 
-1. 发起者运行gen_keys.py生成公私钥，发布公钥，然后输入固定消息运行main.py，生成以下内容
+0. 下载仓库，安装依赖
 
 ```
-固定消息: example1730342749171066
-生成的哈希值: 7a2e27834c756**************************9ffab1b775db41844838
-生成的签名 (16进制): 3671aa831e8651d0dc6c584510a****************************************7ac75da4407824a74cec4c556cbad47f2ff0909b3c
+git clone https://github.com/Lawrenceeeeeeee/decentralized-draw.git
+cd decentralized-draw
+pip install -r requirements.txt
 ```
+
+1. 发起者运行gen_keys.py生成RSA公私钥，发布公钥，然后输入固定消息运行main.py，生成以下内容
+
+```
+消息: example1730342749171066
+哈希值: 7a2e27834c756**************************9ffab1b775db41844838
+签名 (16进制): 3671aa831e8651d0dc6c584510a****************************************7ac75da4407824a74cec4c556cbad47f2ff0909b3c
+```
+并且会生成一个包含上述JSON信息的二维码
 
 2. 发布以上内容
 3. 用户用verify.py进行验证。将公钥文件放在同目录下，在命令行中传参然后运行
@@ -33,8 +42,15 @@ python verify.py "固定消息" "生成的哈希值" "生成的签名 (16进制)
 ### Bilibili去中心化抽奖
 
 UP主可以在指定视频的评论区中发起抽奖
+
 只是一个示例，您完全可以自定义评论数据的处理方式
-一定注意要提前生成密钥对，而且由于b站的API的rate limit比较严格，捉摸不透，抽奖资格筛选的用时可能会比较长。如果你的评论区有将近2000多条评论，可能需要一个多小时才能筛选完。所以我将“是否筛选资格”默认设置成了False。如果您有更好的验证资格的方案，欢迎发PR。
+
+由于b站的API的rate limit比较严格，捉摸不透，抽奖资格筛选的用时可能会比较长。如果你的评论区有将近2000多条评论，可能需要一个多小时才能筛选完。所以我将“是否筛选资格”默认设置成了False。如果您有更好的验证资格的方案，欢迎发PR。
+
+#### 使用方法
+
+1. 先按照上文的方法生成RSA公私钥，并公开公钥
+2. 运行`bilibili_draw.py`，格式如下（如果选择传csv的话，表格需要包含'timestamp''uid''content'列）
 
 示例：
 ```
@@ -56,4 +72,37 @@ options:
                         BV号
   -q, --qualification   是否筛选资格（默认不筛选）
   -uid UID, --uid UID   你的uid(检测资格时需要)
+```
+
+运行后会生成消息、哈希值和签名（16进制）,以及包含这些信息的二维码（以下简称MHS二维码）
+
+并且会输出中奖的uid
+
+3. 参与者如需验证，可以运行`verify.py`，格式如下
+
+示例：
+```
+python verify.py -q '/path/to/your/mhs_qr_code_1730791884.png'
+```
+
+```
+usage: verify.py [-h] [-q QR_CODE] [-m MESSAGE] [-hv HASH_VALUE] [-s SIGNATURE]
+
+验证VRF生成的哈希值和签名
+
+options:
+  -h, --help            show this help message and exit
+  -q QR_CODE, --qr_code QR_CODE
+                        二维码图片路径
+  -m MESSAGE, --message MESSAGE
+                        活动名+时间戳，作为消息输入
+  -hv HASH_VALUE, --hash_value HASH_VALUE
+                        生成的哈希值
+  -s SIGNATURE, --signature SIGNATURE
+                        生成的签名（16进制字符串）
+```
+
+输出样例：
+```
+验证结果: 有效
 ```

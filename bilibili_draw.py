@@ -2,6 +2,9 @@ import pandas as pd
 import time
 import random
 import argparse
+import qrcode
+from PIL import Image
+import json
 from Crypto.PublicKey import RSA
 from Crypto.Signature import pkcs1_15
 from Crypto.Hash import SHA256
@@ -62,6 +65,7 @@ def load_private_key(sk_filename="private_key.pem"):
 # VRF生成函数
 def vrf_prove(sk, message):
     # 使用RSA签名
+    # 考虑到传入的messages不一定是16进制字符串，所以先转换为bytes，反正不影响公正性
     message_bytes = message.encode()
     message_hash = SHA256.new(message_bytes)  # 使用Crypto.Hash.SHA256生成哈希
     signature = pkcs1_15.new(sk).sign(message_hash)
@@ -80,28 +84,43 @@ def draw_lottery(me: int = None):
         
         df_uid = df[df['uid'] == uid]
         # print(df_uid)
-        fixed_message = str(uid)
+        message = str(uid)
         if not df_uid.empty:
             first_comment = df_uid.iloc[0]
-            fixed_message += str(first_comment['timestamp']) + first_comment['content']
+            message += str(first_comment['timestamp']) + first_comment['content']
+        else:
+            continue # 一般不会出现这种情况，除非是评论区出bug
         # print(fixed_message)
         
-        hashed_message = SHA256.new(fixed_message.encode()).hexdigest()
+        hashed_message = SHA256.new(message.encode()).hexdigest()
         message_accumulate_hash ^= int(hashed_message, 16)
         
-        activity_name = hex(message_accumulate_hash)[2:]
-    fixed_message = activity_name
+    message = hex(message_accumulate_hash)[2:]
 
     # 加载私钥
     sk = load_private_key()  # 从文件加载私钥
 
     # 生成VRF结果
-    hash_value, signature_hex = vrf_prove(sk, fixed_message)
+    hash_value, signature_hex = vrf_prove(sk, message)
 
     # 打印供验证使用的信息
-    print("固定消息:", fixed_message)
-    print("生成的哈希值:", hash_value)
-    print("生成的签名 (16进制):", signature_hex)
+    print("消息:", message)
+    print("哈希值:", hash_value)
+    print("签名", signature_hex)
+    
+    data_dict = {
+        "message": message,
+        "hash_value": hash_value,
+        "signature": signature_hex
+    }
+    
+    data_json = json.dumps(data_dict, ensure_ascii=False, indent=2)
+    
+    # 生成MHS二维码
+    qr = qrcode.make(data_json)
+    qr_path = f"mhs_qr_code_{int(time.time())}.png"
+    qr.save(qr_path)
+    print(f"二维码已保存为 {qr_path}")
     
     random.seed(int(hash_value, 16))
     winner = random.sample(list(uids),num)
