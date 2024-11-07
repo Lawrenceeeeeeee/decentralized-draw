@@ -1,11 +1,17 @@
 export DYLD_LIBRARY_PATH=$(brew --prefix zbar)/lib:$DYLD_LIBRARY_PATH
 source ~/.bash_profile
 
-# 检查是否存在 .venv 目录，并设置 Python 解释器
-if [ -d ".venv" ]; then
-    PYTHON_CMD=".venv/bin/python3"
+# 检查是否激活了 Conda 环境并设置 Python 解释器
+if [ -n "$CONDA_PREFIX" ]; then
+    # 使用当前激活的 Conda 环境中的 Python
+    PYTHON_CMD="$CONDA_PREFIX/bin/python"
+    echo "Conda 环境已激活，$PYTHON_CMD"
+elif [ -d ".venv" ]; then
+    # 使用 .venv 中的 Python
+    PYTHON_CMD=".venv/bin/python"
 else
-    PYTHON_CMD="python3"  # 使用系统默认的 python
+    # 使用系统默认的 Python
+    PYTHON_CMD="python"
 fi
 
 # 提示用户选择验证方式
