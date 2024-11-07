@@ -48,7 +48,7 @@ pip install -r requirements.txt
 3. 抽签参与者用verify.py进行验证。将公钥文件（文件名应为`public_key.pem`）放在同目录下，在命令行中传参然后运行
 
 ```
-python verify.py "固定消息" "生成的哈希值" "生成的签名 (16进制)"
+usage: verify.py [-h] [-q QR_CODE] [-m MESSAGE] [-hv HASH_VALUE] [-s SIGNATURE]
 ```
 
 ## 应用案例
@@ -137,5 +137,34 @@ options:
 
 输出样例：
 ```
+验证结果: 有效
+```
+
+鉴于部分非Windows用户在pyzbar库的安装上会存在问题，这里我提供了一个shell脚本的方案，只需要运行`run_verify.sh`并按照指示输入即可。
+
+不过还是建议各位处理好pyzbar安装问题，可以参考[这篇文章](https://stackoverflow.com/questions/71984213/macbook-m1raise-importerrorunable-to-find-zbar-shared-library-importerror)
+
+示例：
+```
+$ ./run_verify.sh
+
+请选择验证方式：
+1. 二维码验证
+2. 手动验证
+输入选项 (1 或 2): 1
+请输入二维码图像的路径: '/Users/lawrence/Desktop/CUFE/Coding/decentralized-draw/mhs_qr_code_1730791884.png'
+验证结果: 有效
+```
+
+```
+$ ./run_verify.sh
+
+请选择验证方式：
+1. 二维码验证
+2. 手动验证
+输入选项 (1 或 2): 2
+消息: d0ab4c0814c691xxxxxxxxxxxxxxxxxxx6f8dcc9a98d7473dd8336c674190
+哈希值: 7536937a1f114xxxxxxxxxxxxxxxxxxxxxxxxxxb34e7ea7c10bb725dd079fb0b
+签名: 7b4a7c37a23d193c0xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx1739cf1ea7b7ed
 验证结果: 有效
 ```

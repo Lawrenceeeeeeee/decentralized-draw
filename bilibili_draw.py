@@ -106,7 +106,7 @@ def draw_lottery(me: int = None):
     # 打印供验证使用的信息
     print("消息:", message)
     print("哈希值:", hash_value)
-    print("签名", signature_hex)
+    print("签名:", signature_hex)
     
     data_dict = {
         "message": message,
