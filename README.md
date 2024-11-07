@@ -154,7 +154,7 @@ $ ./run_verify.sh
 1. 二维码验证
 2. 手动验证
 输入选项 (1 或 2): 1
-请输入二维码图像的路径: '/Users/lawrence/Desktop/CUFE/Coding/decentralized-draw/mhs_qr_code_1730791884.png'
+请输入二维码图像的路径(绝对路径，将图像拖入命令行即可): '/path/to/your/mhs_qr_code.png'
 验证结果: 有效
 ```
 
