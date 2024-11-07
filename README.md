@@ -15,13 +15,27 @@
 
 0. 下载仓库，安装依赖
 
+注：项目使用了pyzbar，windows python wheels里是附带zbar dll的，但是其他系统没有，需要自行安装
+
+Mac OS X:
+```
+brew install zbar
+```
+
+Linux:
+```
+sudo apt-get install libzbar0
+```
+
+然后下载仓库，安装python依赖
+
 ```
 git clone https://github.com/Lawrenceeeeeeee/decentralized-draw.git
 cd decentralized-draw
 pip install -r requirements.txt
 ```
 
-1. 发起者运行gen_keys.py生成RSA公私钥，发布公钥，然后输入固定消息运行main.py，生成以下内容
+1. 抽签发起者运行gen_keys.py生成RSA公私钥，发布公钥，然后输入固定消息运行main.py，生成以下内容
 
 ```
 消息: example1730342749171066
@@ -31,7 +45,7 @@ pip install -r requirements.txt
 并且会生成一个包含上述JSON信息的二维码
 
 2. 发布以上内容
-3. 用户用verify.py进行验证。将公钥文件放在同目录下，在命令行中传参然后运行
+3. 抽签参与者用verify.py进行验证。将公钥文件（文件名应为`public_key.pem`）放在同目录下，在命令行中传参然后运行
 
 ```
 python verify.py "固定消息" "生成的哈希值" "生成的签名 (16进制)"
@@ -49,15 +63,27 @@ UP主可以在指定视频的评论区中发起抽奖
 
 #### 使用方法
 
-0. 先获取浏览器的`User-Agent`，打开浏览器，启用开发者模式，在命令行中输入`console.log(navigator.userAgent)`即可获取。然后将`User-Agent`信息填入config.toml中
+1. 先获取浏览器的`User-Agent`，打开浏览器，启用开发者模式，在命令行中输入`console.log(navigator.userAgent)`即可获取。然后将`User-Agent`信息填入config.toml中
 
 ```
 # config.toml
 User-Agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15"
 ```
 
-1. 按照上文的方法生成RSA公私钥，并公开公钥
-2. 运行`bilibili_draw.py`，格式如下（如果选择传csv的话，表格需要包含'timestamp''uid''content'列）
+Windows用户可能无法通过程序提取cookies，建议在`config.toml`里填写相关cookies项
+```
+# cookies.toml
+# 在浏览器访问`bilibili.com`，打开开发者模式，找到`www.bilibili.com`的cookie，在里面找到下面这几个参数并填写在此处
+
+[cookies]
+SESSDATA=""
+bili_jct=""
+buvid3=""
+DedeUserID=""
+```
+
+2. 按照上文的方法生成RSA公私钥，并公开公钥
+3. 运行`bilibili_draw.py`，格式如下（如果选择传csv的话，表格需要包含'timestamp''uid''content'列）
 
 示例：
 ```
@@ -85,7 +111,7 @@ options:
 
 并且会输出中奖的uid
 
-3. 参与者如需验证，可以运行`verify.py`，格式如下
+4. 参与者如需验证，可以运行`verify.py`，格式如下
 
 示例：
 ```

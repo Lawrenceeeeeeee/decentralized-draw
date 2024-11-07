@@ -11,8 +11,17 @@ import toml
 # 读取配置文件
 config = toml.load("config.toml")
 
-cookies = browser_cookie3.load(domain_name='bilibili.com')
-cookie_str = "; ".join([f"{cookie.name}={cookie.value}" for cookie in cookies])
+try:
+    cookies = browser_cookie3.load(domain_name='bilibili.com')
+    cookie_str = "; ".join([f"{cookie.name}={cookie.value}" for cookie in cookies])
+except Exception as e:
+    print("无法获取Cookie，尝试读取配置文件")
+    try:
+        cookie_str = config["cookies"] # 读出来是dict
+        cookie_str = "; ".join([f"{k}={v}" for k, v in cookie_str.items()])
+    except KeyError:
+        print("请在config.toml中配置Cookie")
+        exit(1)
 
 headers = {
     "User-Agent": config["User-Agent"],
