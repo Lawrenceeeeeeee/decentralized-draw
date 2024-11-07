@@ -37,24 +37,20 @@ def user_verification(fixed_message, provided_hash_value, provided_signature):
     
     if is_valid:
         print("验证结果: 有效")
+        return True
         
         # # 使用哈希值重现随机种子
         # seed_value = int(provided_hash_value, 16)
         # random.seed(seed_value)
     else:
         print("验证结果: 无效")
+        return False
 
 # 命令行解析
-def main():
-    parser = argparse.ArgumentParser(description="验证VRF生成的哈希值和签名")
-    parser.add_argument("-q", "--qr_code", help="二维码图片路径")
-    parser.add_argument("-m", "--message", help="活动名+时间戳，作为消息输入")
-    parser.add_argument("-hv", "--hash_value", help="生成的哈希值")
-    parser.add_argument("-s", "--signature", help="生成的签名（16进制字符串）")
-
-    args = parser.parse_args()
+def main(qr_code=None, message=None, hash_value=None, signature=None):
     
-    if args.qr_code:
+    
+    if qr_code:
         # 从二维码图片中提取信息
         qr_code_image = Image.open(args.qr_code)
         qr_code_data = decode(qr_code_image)
@@ -64,10 +60,8 @@ def main():
         message = qr_code_data["message"]
         hash_value = qr_code_data["hash_value"]
         signature = qr_code_data["signature"]
-    elif args.message and args.hash_value and args.signature:
-        message = args.message
-        hash_value = args.hash_value
-        signature = args.signature
+    elif message and hash_value and signature:
+        pass
     else:
         raise ValueError("请提供消息、哈希值和签名，或者二维码图片路径")
 
@@ -75,7 +69,14 @@ def main():
     provided_signature = bytes.fromhex(signature)
     
     # 执行验证
-    user_verification(message, hash_value, provided_signature)
+    return user_verification(message, hash_value, provided_signature)
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description="验证VRF生成的哈希值和签名")
+    parser.add_argument("-q", "--qr_code", help="二维码图片路径")
+    parser.add_argument("-m", "--message", help="活动名+时间戳，作为消息输入")
+    parser.add_argument("-hv", "--hash_value", help="生成的哈希值")
+    parser.add_argument("-s", "--signature", help="生成的签名（16进制字符串）")
+
+    args = parser.parse_args()
+    main(args.qr_code, args.message, args.hash_value, args.signature)
