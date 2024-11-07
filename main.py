@@ -53,6 +53,6 @@ def draw_lottery(message=""):
 # 执行抽签示例
 if __name__ == "__main__":
     start = time.time()
-    draw_lottery("test")
+    draw_lottery(str(input("请输入消息：")))
     time_lapse = time.time() - start
     print("用时：", time_lapse)

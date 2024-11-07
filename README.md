@@ -35,7 +35,7 @@ cd decentralized-draw
 pip install -r requirements.txt
 ```
 
-1. 抽签发起者运行gen_keys.py生成RSA公私钥，发布公钥，然后输入固定消息运行main.py，生成以下内容
+1. 抽签发起者运行gen_keys.py生成RSA公私钥，发布公钥，然后运行main.py，输入消息，生成以下内容
 
 ```
 消息: example1730342749171066
@@ -141,6 +141,8 @@ options:
 ```
 
 鉴于部分非Windows用户在pyzbar库的安装上会存在问题，这里我提供了一个shell脚本的方案，只需要运行`run_verify.sh`并按照指示输入即可。
+
+还有Windows的bat版本，运行`run_verify.bat`即可
 
 不过还是建议各位处理好pyzbar安装问题，可以参考[这篇文章](https://stackoverflow.com/questions/71984213/macbook-m1raise-importerrorunable-to-find-zbar-shared-library-importerror)
 
