@@ -10,3 +10,4 @@ bilibili-api-python
 pycryptodome
 pyzbar
 toml
+flask

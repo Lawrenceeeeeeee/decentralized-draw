@@ -122,7 +122,7 @@ def run(num, key_path="private_key.pem", file=None, bv_number=None, qualificatio
 # 执行抽签示例
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Bilibili去中心化抽奖系统")
-    
+    parser.add_argument("-k", "--key_path", type=str, help="私钥路径 (默认keys/private_key.pem)")
     parser.add_argument("num", type=int, help="抽取个数")
     parser.add_argument("-f", "--file", type=str, help="评论csv文件 (可选，填写后将不进行爬数据和筛选数据)")
     parser.add_argument("-bv", "--bv_number", type=str, help="BV号")
@@ -133,4 +133,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
     num = args.num
     
-    run(num, "private_key.pem", args.file, args.bv_number, args.qualification, args.uid)
+    key_path = args.key_path if args.key_path else "keys/private_key.pem"
+    
+    run(num, key_path, args.file, args.bv_number, args.qualification, args.uid)
