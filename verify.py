@@ -52,7 +52,7 @@ def main(qr_code=None, message=None, hash_value=None, signature=None):
     
     if qr_code:
         # 从二维码图片中提取信息
-        qr_code_image = Image.open(args.qr_code)
+        qr_code_image = Image.open(qr_code)
         qr_code_data = decode(qr_code_image)
         if not qr_code_data:
             raise ValueError("无法从二维码中提取数据")

@@ -11,7 +11,7 @@ from Crypto.Hash import SHA256
 from src import get_user_info as gui
 from src import get_comments as gc
 from src import allowed_users as au
-
+from datetime import datetime
 
 # 从文件加载私钥
 def load_private_key(sk_filename="private_key.pem"):
@@ -33,7 +33,7 @@ def vrf_prove(sk, message):
 
 
 # 抽签示例
-def draw_lottery(df, num):
+def draw_lottery(df, num, key_path="private_key.pem"):
     # 遍历所有uid，获取对应评论的时间戳和评论，然后组合成"uid+时间戳+评论"，hash后进行异或累加
     message_accumulate_hash = 0
     uids = df['uid'].unique()
@@ -55,7 +55,7 @@ def draw_lottery(df, num):
     message = hex(message_accumulate_hash)[2:]
 
     # 加载私钥
-    sk = load_private_key()  # 从文件加载私钥
+    sk = load_private_key(key_path)  # 从文件加载私钥
 
     # 生成VRF结果
     hash_value, signature_hex = vrf_prove(sk, message)
@@ -75,7 +75,8 @@ def draw_lottery(df, num):
     
     
 
-def run(num, file=None, bv_number=None, qualification=False, uid=None):
+def run(num, key_path="private_key.pem", file=None, bv_number=None, qualification=False, uid=None):
+    file_path = f'list/{bv_number}_{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.csv' if not file else None
     if file:
         df = pd.read_csv(file)
     else:
@@ -86,7 +87,7 @@ def run(num, file=None, bv_number=None, qualification=False, uid=None):
         start = time.time()
         print(f'开始获取{bv}的评论')
         df = gc.get_full_comments('1', bv)
-        df.to_csv(f'{bv}_comments.csv', header=True, encoding='utf-8')
+        df.to_csv(file_path, header=True, encoding='utf-8')
         # df = pd.read_csv('BV1yXtjeSEDZ_comments.csv')
         time_lapse = time.time() - start
         print(f'用时：{time_lapse}')
@@ -98,17 +99,17 @@ def run(num, file=None, bv_number=None, qualification=False, uid=None):
             start = time.time()
             print(f'开始提取{bv}的允许抽奖评论')
             df = au.extract_allowed_comments(df, uid)
-            df.to_csv(f'{bv}_allowed.csv', index=False, encoding='utf-8')
+            df.to_csv(file_path, index=False, encoding='utf-8')
             time_lapse = time.time() - start
             print(f'用时：{time_lapse}')
     
     uids = df['uid'].unique()
-    data_dict = draw_lottery(df, num)
+    data_dict = draw_lottery(df, num, key_path)
     data_json = json.dumps(data_dict, ensure_ascii=False, indent=2)
     
     # 生成MHS二维码
     qr = qrcode.make(data_json)
-    qr_path = f"mhs_qr_code_{int(time.time())}.png"
+    qr_path = f"qr_code/mhs_qr_code_{int(time.time())}.png"
     qr.save(qr_path)
     print(f"二维码已保存为 {qr_path}")
     
@@ -116,7 +117,7 @@ def run(num, file=None, bv_number=None, qualification=False, uid=None):
     winner = random.sample(list(uids),num)
     print("中奖者:", winner)
     
-    return qr_path, winner
+    return file_path, qr_path, winner
 
 # 执行抽签示例
 if __name__ == "__main__":
@@ -132,4 +133,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
     num = args.num
     
-    run(num, args.file, args.bv_number, args.qualification, args.uid)
+    run(num, "private_key.pem", args.file, args.bv_number, args.qualification, args.uid)

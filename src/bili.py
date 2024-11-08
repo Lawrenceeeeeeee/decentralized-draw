@@ -6,6 +6,7 @@ import time
 from functools import reduce
 from hashlib import md5
 import browser_cookie3
+from src import get_cookie as gc
 import toml
 
 # 读取配置文件
@@ -17,8 +18,7 @@ try:
 except Exception as e:
     print("无法获取Cookie，尝试读取配置文件")
     try:
-        cookie_str = config["cookies"] # 读出来是dict
-        cookie_str = "; ".join([f"{k}={v}" for k, v in cookie_str.items()])
+        cookie_str = gc.cookies_from_config()
     except KeyError:
         print("请在config.toml中配置Cookie")
         exit(1)

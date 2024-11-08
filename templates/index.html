@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bilibili 去中心化抽奖系统</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --primary-color: #00a1d6;
+            --primary-gradient: linear-gradient(135deg, #00a1d6 0%, #1db3e7 100%);
+            --secondary-color: #23ade5;
+            --background-color: #f6f7f8;
+            --text-color: #505050;
+            --border-color: #e3e5e7;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--background-color);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .tab-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            justify-content: center;
+        }
+
+        .tab-button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            background: #f0f2f5;
+            color: var(--text-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1em;
+            font-weight: 500;
+        }
+
+        .tab-button:hover {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .tab-button.active {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .tab {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        input[type="text"],
+        input[type="number"],
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1em;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        textarea:focus {
+            border-color: var(--primary-color);
+            outline: none;
+        }
+
+        input[type="file"] {
+            width: 100%;
+            padding: 12px;
+            border: 2px dashed var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        input[type="file"]:hover {
+            border-color: var(--primary-color);
+            background: #f8f9fa;
+        }
+
+        button[type="submit"]:hover {
+            background: var(--secondary-color);
+        }
+
+        .verify-method {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .method-button {
+            padding: 10px 20px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+        }
+
+        .method-button.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .verify-form {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .result-box {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: 500;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .result-success {
+            background: #e3f7e9;
+            color: #0a7b2d;
+        }
+
+        .result-error {
+            background: #fde8e8;
+            color: #c81e1e;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            .tab-buttons {
+                flex-direction: column;
+            }
+
+            .tab-button {
+                width: 100%;
+            }
+        }
+
+        /* 复选框样式 */
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        /* 加载动画 */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .key-warning {
+            background: #fff8e6;
+            border: 1px solid #ffd591;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .warning-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .key-warning ul {
+            list-style-position: inside;
+            margin-top: 10px;
+        }
+
+        .key-warning li {
+            margin: 8px 0;
+            color: #666;
+        }
+
+        .generate-btn {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 1.1em;
+            font-weight: 500;
+            width: 100%;
+            transition: all 0.3s ease;
+            margin: 20px 0;
+        }
+
+        .generate-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 161, 214, 0.3);
+        }
+
+        .key-instructions {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f0f9ff;
+            border-radius: 8px;
+        }
+
+        .key-instructions p {
+            margin: 5px 0;
+            color: #666;
+        }
+
+        .success-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .error-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+            color: var(--error-color);
+        }
+
+        .submit-btn {
+            background: var(--primary-color);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 500;
+            width: 100%;
+            transition: background 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            background: var(--secondary-color);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Bilibili 去中心化抽奖系统</h1>
+        
+        <div class="tab-buttons">
+            <button class="tab-button active" onclick="showTab('keyGen')">密钥生成</button>
+            <button class="tab-button" onclick="showTab('draw')">抽奖</button>
+            <button class="tab-button" onclick="showTab('verify')">验证</button>
+        </div>
+
+        <div id="keyGen" class="tab active">
+            <div class="key-warning">
+                <div class="warning-icon">⚠️</div>
+                <p>重要提示：</p>
+                <ul>
+                    <li>私钥文件只会在您的浏览器中生成，不会上传到服务器</li>
+                    <li>请务必保管好您的私钥文件，它将用于后续的抽奖操作</li>
+                    <li>一旦生成新的密钥对，旧的密钥对将无法使用</li>
+                    <li>建议为每次抽奖活动使用新的密钥对</li>
+                </ul>
+            </div>
+            <button onclick="generateAndDownloadKeys()" class="generate-btn">
+                生成并下载密钥对
+            </button>
+            <div id="keyStatus" class="result-box"></div>
+        </div>
+
+        <div id="draw" class="tab">
+            <form id="drawForm">
+                <div class="form-group">
+                    <label>私钥文件:</label>
+                    <input type="file" name="private_key" accept=".pem">
+                </div>
+
+                <div class="form-group">
+                    <label>CSV 文件 (可选):</label>
+                    <input type="file" name="csv_file" accept=".csv">
+                </div>
+
+                <div class="form-group">
+                    <label>BV号:</label>
+                    <input type="text" name="bv" placeholder="请输入BV号">
+                </div>
+
+                <div class="form-group">
+                    <label>抽取数量:</label>
+                    <input type="number" name="num" min="1" value="1">
+                </div>
+
+                <div class="form-group checkbox-wrapper">
+                    <input type="checkbox" name="qualification" id="qualification">
+                    <label for="qualification">检测资格</label>
+                </div>
+
+                <div class="form-group">
+                    <label>UID (检测资格时需要):</label>
+                    <input type="text" name="uid" placeholder="请输入UID">
+                </div>
+
+                <button type="submit" class="submit-btn">开始抽奖</button>
+            </form>
+
+            <div id="drawResult" class="result-box"></div>
+            <img id="qrCode" class="qr-code" style="display: none; max-width: 200px; margin: 20px auto;">
+            <button id="downloadCsv" style="display: none;" class="submit-btn">下载候选名单</button>
+        </div>
+
+        <div id="verify" class="tab">
+            <div class="verify-method">
+                <button class="method-button active" onclick="switchVerifyMethod('qr')">二维码验证</button>
+                <button class="method-button" onclick="switchVerifyMethod('manual')">手动验证</button>
+            </div>
+
+            <div class="verify-form">
+                <div class="form-group">
+                    <label>公钥文件:</label>
+                    <input type="file" name="public_key" accept=".pem" id="publicKeyFile">
+                </div>
+            </div>
+
+            <div id="qrVerify" class="verify-form">
+                <form id="qrVerifyForm">
+                    <input type="hidden" name="type" value="qr">
+                    <div class="form-group">
+                        <label>上传二维码图:</label>
+                        <input type="file" name="qr_file" accept="image/*" required>
+                    </div>
+                    <button type="submit" class="submit-btn">验证</button>
+                </form>
+            </div>
+
+            <div id="manualVerify" class="verify-form" style="display: none;">
+                <form id="manualVerifyForm">
+                    <input type="hidden" name="type" value="manual">
+                    <div class="form-group">
+                        <label>消息:</label>
+                        <input type="text" name="message" required placeholder="请输入消息">
+                    </div>
+                    <div class="form-group">
+                        <label>哈希值:</label>
+                        <input type="text" name="hash_value" required placeholder="请输入哈希值">
+                    </div>
+                    <div class="form-group">
+                        <label>签名:</label>
+                        <textarea name="signature" required rows="3" placeholder="请输入签名"></textarea>
+                    </div>
+                    <button type="submit" class="submit-btn">验证</button>
+                </form>
+            </div>
+
+            <div id="verifyResult" class="result-box"></div>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabId) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            document.querySelector(`button[onclick="showTab('${tabId}')"]`).classList.add('active');
+        }
+
+        function switchVerifyMethod(method) {
+            document.querySelectorAll('.method-button').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            document.getElementById('qrVerify').style.display = method === 'qr' ? 'block' : 'none';
+            document.getElementById('manualVerify').style.display = method === 'manual' ? 'block' : 'none';
+            
+            document.getElementById('verifyResult').textContent = '';
+            document.getElementById('verifyResult').className = 'result-box';
+        }
+
+        async function generateAndDownloadKeys() {
+            const statusDiv = document.getElementById('keyStatus');
+            statusDiv.innerHTML = '<div class="loading"></div>生成密钥中...';
+            statusDiv.className = 'result-box';
+
+            try {
+                const response = await fetch('/generate_keys', {
+                    method: 'POST'
+                });
+                
+                if (!response.ok) {
+                    throw new Error('网络请求失败');
+                }
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // 下载私钥
+                    const privateKeyBlob = new Blob([data.privateKey], { type: 'application/x-pem-file' });
+                    const privateKeyUrl = window.URL.createObjectURL(privateKeyBlob);
+                    const privateKeyLink = document.createElement('a');
+                    privateKeyLink.href = privateKeyUrl;
+                    privateKeyLink.download = 'private_key.pem';
+                    document.body.appendChild(privateKeyLink);
+                    privateKeyLink.click();
+                    document.body.removeChild(privateKeyLink);
+                    window.URL.revokeObjectURL(privateKeyUrl);
+                    
+                    // 延迟一下再下载公钥，避免浏览器阻止
+                    setTimeout(() => {
+                        const publicKeyBlob = new Blob([data.publicKey], { type: 'application/x-pem-file' });
+                        const publicKeyUrl = window.URL.createObjectURL(publicKeyBlob);
+                        const publicKeyLink = document.createElement('a');
+                        publicKeyLink.href = publicKeyUrl;
+                        publicKeyLink.download = 'public_key.pem';
+                        document.body.appendChild(publicKeyLink);
+                        publicKeyLink.click();
+                        document.body.removeChild(publicKeyLink);
+                        window.URL.revokeObjectURL(publicKeyUrl);
+                    }, 1000);
+                    
+                    statusDiv.innerHTML = `
+                        <div class="success-icon">✅</div>
+                        <p>密钥对已生成并开始下载</p>
+                        <div class="key-instructions">
+                            <p>请妥善保管您的私钥文件(private_key.pem)</p>
+                            <p>您可以公开分享公钥文件(public_key.pem)</p>
+                        </div>
+                    `;
+                    statusDiv.classList.add('result-success');
+                } else {
+                    throw new Error(data.message || '生成密钥失败');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                statusDiv.innerHTML = `
+                    <div class="error-icon">❌</div>
+                    <p>生成密钥失败: ${error.message}</p>
+                `;
+                statusDiv.classList.add('result-error');
+            }
+        }
+
+        document.getElementById('drawForm').onsubmit = async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const resultDiv = document.getElementById('drawResult');
+            const qrCode = document.getElementById('qrCode');
+            
+            resultDiv.innerHTML = '<div class="loading"></div>抽奖中...';
+            resultDiv.className = 'result-box';
+            qrCode.style.display = 'none';
+
+            try {
+                const response = await fetch('/draw', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.textContent = `中奖者: ${data.winners.join(', ')}`;
+                    resultDiv.classList.add('result-success');
+                    qrCode.src = `/qr_code/${data.qr_path.split('/').pop()}`;
+                    qrCode.style.display = 'block';
+                    
+                    // 显示下载按钮并添加点击事件
+                    const downloadBtn = document.getElementById('downloadCsv');
+                    downloadBtn.style.display = 'block';
+                    downloadBtn.onclick = () => {
+                        window.location.href = `/download_csv/${data.csv_path.split('/').pop()}`;
+                    };
+                } else {
+                    resultDiv.textContent = data.message;
+                    resultDiv.classList.add('result-error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.textContent = '抽奖失败';
+                resultDiv.classList.add('result-error');
+            }
+        };
+
+        async function submitVerification(formData) {
+            const resultDiv = document.getElementById('verifyResult');
+            resultDiv.innerHTML = '<div class="loading"></div>验证中...';
+            resultDiv.className = 'result-box';
+
+            const publicKeyFile = document.getElementById('publicKeyFile').files[0];
+            if (publicKeyFile) {
+                formData.append('public_key', publicKeyFile);
+            }
+
+            try {
+                const response = await fetch('/verify', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    resultDiv.textContent = data.verified ? '✅ 验证成功！' : '❌ 验证失败！';
+                    resultDiv.classList.add(data.verified ? 'result-success' : 'result-error');
+                } else {
+                    resultDiv.textContent = `错误: ${data.message}`;
+                    resultDiv.classList.add('result-error');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                resultDiv.textContent = '验证过程发生错误';
+                resultDiv.classList.add('result-error');
+            }
+        }
+
+        document.getElementById('qrVerifyForm').onsubmit = async (e) => {
+            e.preventDefault();
+            await submitVerification(new FormData(e.target));
+        };
+
+        document.getElementById('manualVerifyForm').onsubmit = async (e) => {
+            e.preventDefault();
+            await submitVerification(new FormData(e.target));
+        };
+    </script>
+</body>
+</html> 

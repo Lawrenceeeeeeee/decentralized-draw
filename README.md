@@ -63,6 +63,8 @@ UP主可以在指定视频的评论区中发起抽奖
 
 #### 使用方法
 
+注意！！！如果你是Mac用户，请一定要给终端或者这个应用开启完全磁盘访问权限，否则无法自动读取cookies
+
 1. 先获取浏览器的`User-Agent`，打开浏览器，启用开发者模式，在命令行中输入`console.log(navigator.userAgent)`即可获取。然后将`User-Agent`信息填入config.toml中
 
 ```

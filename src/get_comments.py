@@ -5,17 +5,10 @@ import json
 import time
 import pandas as pd
 import browser_cookie3
+from src import get_cookie as gc
+import toml
 
-# app_key = "27eb53fc9058f8c3"
-# app_sec = "c2ed53a74eeefe3cf99fbd01d8c9c375"
-
-app_key = "4ebafd7c4951b366"
-app_sec = "8cb98205e9b2ad3669aad0fce12a4c13"
-
-
-
-# bv = "BV1bc411f7fK"
-# av = bvav.bv2av(bv)
+config = toml.load("config.toml")
 
 columns = ['oid','timestamp', 'rpid', 'uid', 'uname', 'content', 'likes', 'replies']
 
@@ -42,11 +35,16 @@ def get_comments(type, oid, sort=0, nohot=0, ps=20, pn=1):
         "ps": ps,
         "pn": pn,
     }
-    cookies = browser_cookie3.load(domain_name='bilibili.com')
-    cookie_str = "; ".join([f"{cookie.name}={cookie.value}" for cookie in cookies])
-
+    
+    try:    
+        cookies = browser_cookie3.load(domain_name='bilibili.com')
+        cookie_str = "; ".join([f"{cookie.name}={cookie.value}" for cookie in cookies])
+    except Exception as e:
+        print(f"获取cookies失败，尝试读取config.toml中的cookies")
+        cookie_str = gc.cookies_from_config()
+    
     headers = {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Safari/605.1.15",
+        "User-Agent": config['User-Agent'],
         "Referer": "https://www.bilibili.com/",
         "Cookie": cookie_str,
     }

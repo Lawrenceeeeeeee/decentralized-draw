@@ -1,5 +1,11 @@
 import browser_cookie3
 import requests
+import toml
+
+config = toml.load("config.toml")
+
+def cookies_from_config() -> dict:
+    return "; ".join([f"{k}={v}" for k, v in config['cookies'].items()])
 
 def get_cookie(platform: str = "safari") -> dict:
     # 从Safari浏览器中读取B站的Cookie
